@@ -1,1 +1,23 @@
-{"User.dd00b24b-6451-45e0-9f1b-6e27282a1315": {"id": "dd00b24b-6451-45e0-9f1b-6e27282a1315", "created_at": "2023-03-21T12:25:02.108692", "updated_at": "2023-03-21T12:25:02.108698", "__class__": "User"}, "State.6cc00fa8-5aef-49fc-8767-fade0159319e": {"id": "6cc00fa8-5aef-49fc-8767-fade0159319e", "created_at": "2023-03-21T15:56:09.679133", "updated_at": "2023-03-21T15:56:09.679146", "name": "California", "__class__": "State"}, "State.56268fa8-d169-43c6-9e0b-9a0434d902c8": {"id": "56268fa8-d169-43c6-9e0b-9a0434d902c8", "created_at": "2023-03-21T15:58:18.101514", "updated_at": "2023-03-21T15:58:18.101527", "name": "California", "__class__": "State"}, "State.8fb6f287-3b01-4346-a6af-09825cbf44d7": {"id": "8fb6f287-3b01-4346-a6af-09825cbf44d7", "created_at": "2023-03-21T16:01:34.505544", "updated_at": "2023-03-21T16:01:34.505574", "name": "California", "__class__": "State"}}
+{
+    "User.dd00b24b-6451-45e0-9f1b-6e27282a1315": {
+        "id": "dd00b24b-6451-45e0-9f1b-6e27282a1315",
+        "created_at": "2023-03-21T12:25:02.108692",
+        "updated_at": "2023-03-21T12:25:02.108698",
+        "__class__": "User"
+    },
+    "State.8fb6f287-3b01-4346-a6af-09825cbf44d7": {
+        "id": "8fb6f287-3b01-4346-a6af-09825cbf44d7",
+        "created_at": "2023-03-21T16:01:34.505544",
+        "updated_at": "2023-03-21T16:01:34.505574",
+        "name": "California",
+        "__class__": "State"
+    },
+    "City.048c30cf-eb74-462b-b0b6-0fec43ff0cb8": {
+        "id": "048c30cf-eb74-462b-b0b6-0fec43ff0cb8",
+        "created_at": "2023-03-21T16:34:33.514259",
+        "updated_at": "2023-03-21T16:34:33.514276",
+        "state_id": "<8fb6f287-3b01-4346-a6af-09825cbf44d7>",
+        "name": "Fremont",
+        "__class__": "City"
+    }
+}
