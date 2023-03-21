@@ -3,24 +3,38 @@
 import json
 import models
 
+
 class FileStorage:
     """This class manages storage of hbnb models in JSON format"""
     __file_path = 'file.json'
     __objects = {}
-    
+
     def delete(self, obj=None):
         """delete dates of json"""
         if obj is not None and obj in self.__objects:
             del self.__objects[obj]
-    
-    def all(self, cls=None):
+
+    """def all(self, cls=None):
         '''
             Return the dictionary
         '''
         if cls is None:
             return list(self.__objects)
         else:
-            return [obj for obj in self.__objects.items() if isinstance(obj, cls)]
+            return [obj for obj in self.__objects.items() if isinstance(obj, cls)] """
+
+
+    def all(self, cls=None):
+        """Returns a dictionary of models currently in storage, if a class
+        is specified, it returns of objects of said class"""
+        if cls is None:
+            return FileStorage.__objects
+        dir_same_cls = {}
+        for key, value in FileStorage.__objects.items():
+            if value.__class__ == cls:
+                dir_same_cls[key] = value
+        return dir_same_cls
+
 
     def new(self, obj):
         """Adds new object to storage dictionary"""
@@ -46,15 +60,15 @@ class FileStorage:
         from models.review import Review
 
         classes = {
-                    'BaseModel': BaseModel, 'User': User, 'Place': Place,
-                    'State': State, 'City': City, 'Amenity': Amenity,
-                    'Review': Review
-                  }
+            'BaseModel': BaseModel, 'User': User, 'Place': Place,
+            'State': State, 'City': City, 'Amenity': Amenity,
+            'Review': Review
+        }
         try:
             temp = {}
             with open(FileStorage.__file_path, 'r') as f:
                 temp = json.load(f)
                 for key, val in temp.items():
-                        self.all()[key] = classes[val['__class__']](**val)
+                    self.all()[key] = classes[val['__class__']](**val)
         except FileNotFoundError:
             pass
