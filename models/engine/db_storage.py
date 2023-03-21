@@ -2,8 +2,7 @@
 """
 New engine DBStorage
 """
-
-from models.base_model import BaseModel, Base
+from models.base_model import Base
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
 from os import getenv
@@ -13,6 +12,8 @@ from models.user import User
 from models.place import Place
 from models.amenity import Amenity
 from models.review import Review
+import models
+
 
 classes = {'User': User, 'Place': Place,
            'State': State, 'City': City, 'Amenity': Amenity,
