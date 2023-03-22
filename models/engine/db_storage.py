@@ -13,6 +13,8 @@ from models.place import Place
 from models.amenity import Amenity
 from models.review import Review
 import models
+from sqlalchemy import MetaData
+from sqlalchemy.orm import Session
 
 
 classes = {'User': User, 'Place': Place,
