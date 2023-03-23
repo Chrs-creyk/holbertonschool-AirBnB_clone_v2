@@ -10,6 +10,8 @@ from models.state import State
 from models.city import City
 from models.amenity import Amenity
 from models.review import Review
+import models
+import shlex
 
 
 class HBNBCommand(cmd.Cmd):
@@ -112,46 +114,32 @@ class HBNBCommand(cmd.Cmd):
         """ Overrides the emptyline method of CMD """
         pass
 
-    def do_create(self, args):
-        """ Create an object of any class"""
-        if not args:
+    def do_create(self, line):
+        """Creates a new instance of a valid class, saves it (to the JSON file)
+        and prints the id, accepts optional attributes-value pairs
+        (e.g. name="Ohio")
+        Args:
+            line (str): command line user input
+        """
+        args = shlex.split(line)
+        if len(args) == 0:
             print("** class name missing **")
-            return
-
-        args = args.split(' ')
-        cls = args[0]
-
-        if cls not in HBNBCommand.classes:
-            print("** class doesn't exist")
-            return
-
-        if cls in HBNBCommand.classes:
-            new_dict = {}
-            if len(args) == 1:
-                # print(args)
-                new_instance = HBNBCommand.classes[cls]()
-                # print(new_instance)
-                new_instance.save()
-                print(new_instance.id)
-            else:
-                for a in args:
-                    if "=" in a:
-                        key_value_list = a.split('=')
-                        key = key_value_list[0]
-                        value = key_value_list[1]
-                        if value[0] and value[-1] == '"':
-                            value = value[1:-1]
-                            if '_' in value:
-                                value = value.replace('_', ' ')
-                        else:
-                            value = eval(value)
-
-                        new_dict[key] = value
-
-                new_instance = HBNBCommand.classes[cls]()
-                new_instance.__dict__.update(new_dict)
-                new_instance.save()
-                print(new_instance.id)
+        elif args[0] not in self.all_classes:
+            print("** class doesn't exist **")
+        else:
+            cls = self.all_classes[args[0]]
+            obj = cls()
+            if len(args) > 1:
+                for i in range(1, len(args)):
+                    pair = args[i].split('=')
+                    if len(pair) == 2:
+                        pair[1] = pair[1].replace('_', ' ')
+                        try:
+                            setattr(obj, pair[0], eval(pair[1]))
+                        except (SyntaxError, NameError):
+                            setattr(obj, pair[0], pair[1])
+            print(obj.id)
+            models.storage.save()
 
     def help_create(self):
         """ Help information for the create method """
