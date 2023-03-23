@@ -24,6 +24,12 @@ class HBNBCommand(cmd.Cmd):
 
     prompt = ("(hbnb) ")
     all_classes = classes
+    
+    classes = {
+               'BaseModel': BaseModel, 'User': User, 'Place': Place,
+               'State': State, 'City': City, 'Amenity': Amenity,
+               'Review': Review
+              }
 
     def do_quit(self, args):
         '''
@@ -213,7 +219,4 @@ class HBNBCommand(cmd.Cmd):
 
 
 if __name__ == "__main__":
-    '''
-        Entry point for the loop.
-    '''
     HBNBCommand().cmdloop()
