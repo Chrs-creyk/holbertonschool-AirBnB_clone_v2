@@ -12,6 +12,7 @@ from models.amenity import Amenity
 from models.review import Review
 import models
 import shlex
+from models import classes
 
 
 class HBNBCommand(cmd.Cmd):
@@ -20,6 +21,7 @@ class HBNBCommand(cmd.Cmd):
     # determines prompt for interactive/non-interactive modes
     prompt = '(hbnb) ' if sys.__stdin__.isatty() else ''
 
+    all_classes = classes
     classes = {
         'BaseModel': BaseModel, 'User': User, 'Place': Place,
         'State': State, 'City': City, 'Amenity': Amenity,
