@@ -14,19 +14,15 @@ class FileStorage:
     __objects = {}
 
     def all(self, cls=None):
-        '''
-            Return the dictionary
-        '''
-        obje = {}
+        """Returns a dictionary of models currently in storage, if a class
+        is specified, it returns of objects of said class"""
         if cls is None:
-            return (self.__objects)
-        else:
-            if type(cls) is str:
-                cls = models.classes[cls]
-            for key, val in self.__objects.items():
-                if cls.__name__ == val.__class__.__name__:
-                    obje[key] = val
-            return (obje)
+            return FileStorage.__objects
+        dir_same_cls = {}
+        for key, value in FileStorage.__objects.items():
+            if value.__class__ == cls:
+                dir_same_cls[key] = value
+        return dir_same_cls
 
     def new(self, obj):
         '''
@@ -50,15 +46,9 @@ class FileStorage:
             json.dump(objects_dict, fd)
 
     def delete(self, obj=None):
-        """
-        Public instance method to delete obj from the __objects
-        """
-        if not obj:
+        """Deletes object from storage"""
+        if obj is None:
             return
-        key = '{}.{}'.format(type(obj).__name__, obj.id)
-        if key in self.__objects:
-            del self.__objects[key]
-            self.save()
 
     def reload(self):
         '''
