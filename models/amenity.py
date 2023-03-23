@@ -1,22 +1,17 @@
 #!/usr/bin/python3
-'''
-    Implementation of the Amenity class
-'''
+""" State Module for HBNB project """
 from models.base_model import BaseModel, Base
-from sqlalchemy import Column, String, Integer, ForeignKey, Table
+from sqlalchemy import Column, String
 from sqlalchemy.orm import relationship
-import os
-from models.place import place_amenity
+from os import getenv
+
+env = getenv('HBNB_TYPE_STORAGE')
 
 
-class Amenity(BaseModel, Base):
-    '''
-        Implementation for the Amenities.
-    '''
-    __tablename__ = 'amenities'
-    if os.getenv('HBNB_TYPE_STORAGE') == 'db':
+class Amenity(BaseModel, Base if (env == "db") else object):
+    """Amenity Class for HBnB"""
+    if env == "db":
+        __tablename__ = "amenities"
         name = Column(String(128), nullable=False)
-        place_amenities = relationship(
-            "Place", secondary=place_amenity)
     else:
         name = ""
