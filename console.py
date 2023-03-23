@@ -37,32 +37,37 @@ class HBNBCommand(cmd.Cmd):
         '''
         return True
 
-    def do_create(self, line):
-        """Creates a new instance of a valid class, saves it (to the JSON file)
-        and prints the id, accepts optional attributes-value pairs
-        (e.g. name="Ohio")
-        Args:
-            line (str): command line user input
-        """
-        args = shlex.split(line)
-        if len(args) == 0:
+    def do_create(self, args):
+        """ Create an object of any class"""
+        if not args:
             print("** class name missing **")
-        elif args[0] not in self.all_classes:
+            return
+        arg_array = args.split(' ')
+        if arg_array[0] not in HBNBCommand.classes:
             print("** class doesn't exist **")
-        else:
-            cls = self.all_classes[args[0]]
-            obj = cls()
-            if len(args) > 1:
-                for i in range(1, len(args)):
-                    pair = args[i].split('=')
-                    if len(pair) == 2:
-                        pair[1] = pair[1].replace('_', ' ')
-                        try:
-                            setattr(obj, pair[0], eval(pair[1]))
-                        except (SyntaxError, NameError):
-                            setattr(obj, pair[0], pair[1])
-            print(obj.id)
-            models.storage.save()
+            return
+        kwargs = dict()
+        for i in range(1, len(arg_array)):
+            attr_array = arg_array[i].split('=')
+            if "\"" in attr_array[1] and attr_array[1][-1] == "\"":
+                attr_array[1] = attr_array[1][1:-1]
+                if "_" in attr_array[1]:
+                    attr_array[1] = attr_array[1].replace("_", " ")
+            elif "." in attr_array[1]:
+                try:
+                    attr_array[1] = float(attr_array[1])
+                except Exception:
+                    continue
+            else:
+                try:
+                    attr_array[1] = int(attr_array[1])
+                except Exception:
+                    continue
+            kwargs[attr_array[0]] = attr_array[1]
+        new_instance = HBNBCommand.classes[arg_array[0]]()
+        new_instance.__dict__.update(kwargs)
+        print(new_instance.id)
+        new_instance.save()
 
     def do_show(self, line):
         '''
