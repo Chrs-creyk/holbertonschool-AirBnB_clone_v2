@@ -114,14 +114,14 @@ class HBNBCommand(cmd.Cmd):
         """ Overrides the emptyline method of CMD """
         pass
 
-    def do_create(self, line):
+    def do_create(self, arg):
         """Creates a new instance of a valid class, saves it (to the JSON file)
         and prints the id, accepts optional attributes-value pairs
         (e.g. name="Ohio")
         Args:
             line (str): command line user input
         """
-        args = shlex.split(line)
+        args = shlex.split(arg)
         if len(args) == 0:
             print("** class name missing **")
         elif args[0] not in self.all_classes:
