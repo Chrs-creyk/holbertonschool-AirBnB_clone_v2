@@ -9,15 +9,14 @@ class FileStorage:
     __objects = {}
 
     def all(self, cls=None):
-        """Returns a dictionary of models currently in storage, if a class
-        is specified, it returns of objects of said class"""
-        if cls is None:
+        """Returns a dictionary of models currently in storage"""
+        if not cls:
             return FileStorage.__objects
-        dir_same_cls = {}
-        for key, value in FileStorage.__objects.items():
-            if value.__class__ == cls:
-                dir_same_cls[key] = value
-        return dir_same_cls
+        ret_dict = dict()
+        for object_name, object in FileStorage.__objects.items():
+            if isinstance(object, cls):
+                ret_dict[object_name] = object
+        return ret_dict
 
     def new(self, obj):
         """Adds new object to storage dictionary"""
@@ -31,15 +30,6 @@ class FileStorage:
             for key, val in temp.items():
                 temp[key] = val.to_dict()
             json.dump(temp, f)
-
-    def delete(self, obj=None):
-        """Deletes object from storage"""
-        if obj is None:
-            return
-
-        key = obj.to_dict()['__class__'] + '.' + obj.id
-        if key in FileStorage.__objects:
-            del FileStorage.__objects[key]
 
     def reload(self):
         """Loads storage dictionary from file"""
@@ -65,6 +55,14 @@ class FileStorage:
         except FileNotFoundError:
             pass
 
+    def delete(self, obj=None):
+        '''Deletes an object from FileStorage.__objects'''
+        if not obj:
+            return
+        if obj in FileStorage.__objects.values():
+            del FileStorage.__objects[obj.to_dict()['__class__'] +
+                                      '.' + obj.id]
+
     def close(self):
-        """ Deserialize JSON to objects """
+        '''Required to update HBNB using flask'''
         self.reload()
