@@ -2,10 +2,10 @@
 """ Review module for the HBNB project """
 from models.base_model import BaseModel, Base
 from sqlalchemy import Column, String, ForeignKey
+import os
 from os import getenv
 
-
-class Review(BaseModel, Base):
+class Review(BaseModel, Base if os.getenv('HBNB_TYPE_STORAGE') == 'db' else object):
     """ Review class to store review information """
     if getenv('HBNB_TYPE_STORAGE') == 'db':
         __tablename__ = "reviews"

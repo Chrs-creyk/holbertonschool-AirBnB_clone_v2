@@ -6,9 +6,9 @@ from models.base_model import BaseModel, Base
 from sqlalchemy import String, Column
 from sqlalchemy.orm import relationship
 import os
+from os import getenv
 
-
-class User(BaseModel, Base):
+class User(BaseModel, Base if os.getenv('HBNB_TYPE_STORAGE') == 'db' else object):
     '''
         Definition of the User class
     '''

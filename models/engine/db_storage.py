@@ -11,9 +11,11 @@ from models.city import City
 from models.amenity import Amenity
 from models.place import Place
 from models.review import Review
-from models import classes
 import models
 
+classes = {'User': User, 'Place': Place,
+           'State': State, 'City': City, 'Amenity': Amenity,
+           'Review': Review}
 
 class DBStorage:
     """
@@ -23,20 +25,16 @@ class DBStorage:
     __session = None
 
     def __init__(self):
-        """
-        Initializes database connection
-        """
-        user_name = os.getenv("HBNB_MYSQL_USER")
-        pwd = os.getenv("HBNB_MYSQL_PWD")
-        host = os.getenv("HBNB_MYSQL_HOST")
-        db = os.getenv("HBNB_MYSQL_DB")
-
-        self.__engine = create_engine(
-            'mysql+mysqldb://{}:{}@{}/{}'.format(
-                user_name, pwd, host, db), pool_pre_ping=True)
-
-        if os.getenv("HBNB_ENV") == 'test':
-            Base.metadata.drop_all(bind=self.__engine)
+        ''' Init method for dbstorage'''
+        user = os.getenv('HBNB_MYSQL_USER')
+        pwd = os.getenv('HBNB_MYSQL_PWD')
+        host = os.getenv('HBNB_MYSQL_HOST')
+        db = os.getenv('HBNB_MYSQL_DB')
+        self.__engine = create_engine("mysql+mysqldb://{}:{}@{}:3306/{}".format(
+                                    user, pwd, host, db), pool_pre_ping=True)
+        metadata = MetaData()
+        if os.getenv('HBNB_ENV') == 'test':
+            metadata.drop_all()
 
     def all(self, cls=None):
         """
