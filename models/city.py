@@ -8,6 +8,7 @@ from sqlalchemy.orm import relationship
 import os
 from os import getenv
 
+
 class City(BaseModel, Base if os.getenv('HBNB_TYPE_STORAGE') == 'db' else object):
     '''
         Define the class City that inherits from BaseModel.
