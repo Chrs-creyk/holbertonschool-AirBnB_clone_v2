@@ -1,56 +1,48 @@
 #!/usr/bin/python3
-""" """
-
-
+""" Test DBstorage"""
 import unittest
-import models
-from models.base_model import BaseModel, Base
-from models.user import User
-from models.review import Review
-from models.amenity import Amenity
-from models.state import State
-from models.place import Place
-from models.city import City
+from models.base_model import BaseModel
+from models import storage
 import os
-from sqlalchemy import Column, Integer, String, create_engine
-from sqlalchemy.orm import sessionmaker
+from models.state import State
 
 
-@unittest.skipIf(os.getenv('HBNB_TYPE_STORAGE') != 'db',
-                 "only testing db storage")
-class test_DBStorage(unittest.TestCase):
+class test_dbstorage(unittest.TestCase):
+    """ Class to test the DBstorage method """
 
-    def testState(self):
-        state = State(name="Gregory")
-        if state.id in models.storage.all():
-            self.assertTrue(state.name, "Gregory")
+    @unittest.skipIf(os.getenv('HBNB_TYPE_STORAGE') != 'db',
+                     "Cannot storage if db is active")
+    def setUp(self):
+        """ Set up test environment """
+        del_list = []
+        for key in storage.all().keys():
+            del_list.append(key)
+        for key in del_list:
+            storage._DBStorage__session.delete(storage.all()[key])
+            storage._DBStorage__session.commit()
 
-    def testCity(self):
-        city = City(name="Delhi")
-        if city.id in models.storage.all():
-            self.assertTrue(city.name, "Delhi")
+    def test_obj_list_empty(self):
+        """ __objects is initially empty """
+        self.assertEqual(len(storage.all()), 0)
 
-    def testPlace(self):
-        place = Place(name="matchstick apartment", number_rooms=5)
-        if place.id in models.storage.all():
-            self.assertTrue(place.number_rooms, 5)
-            self.assertTrue(place.name, "matchstick apartment")
+    def test_reload_from_nonexistent(self):
+        """ Nothing happens if file does not exist """
+        self.assertEqual(storage.reload(), None)
 
-    def testUser(self):
-        user = User(name="Hail the lord")
-        if user.id in models.storage.all():
-            self.assertTrue(user.name, "Hail the lord")
+    def test_type_objects(self):
+        """ Confirm __objects is a dict """
+        self.assertEqual(type(storage.all()), dict)
 
-    def testAmenity(self):
-        amenity = Amenity(name="Toilet")
-        if amenity.id in models.storage.all():
-            self.assertTrue(amenity.name, "Bathtub")
+    def test_store(self):
+        """ Test if an object is store in the database """
+        new = State(name="Florida")
+        new.save()
+        _id = new.to_dict()['id']
+        self.assertIn(new.__class__.__name__ + '.' + _id,
+                        storage.all(type(new)).keys())
 
-    def testReview(self):
-        review = Review(text="hello")
-        if review.id in models.storage.all():
-            self.assertTrue(review.text, "Whaddup")
+    def test_storage_var_created(self):
+        """ FileStorage object storage created """
+        from models.engine.db_storage import DBStorage
+        self.assertEqual(type(storage), DBStorage)
 
-    def teardown(self):
-        self.session.close()
-        self.session.rollback()
