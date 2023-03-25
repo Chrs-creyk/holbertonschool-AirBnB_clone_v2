@@ -113,46 +113,36 @@ class HBNBCommand(cmd.Cmd):
         pass
 
     def do_create(self, args):
-        classname, *params = args.split()
-
-        # Vallidations
-        if not classname:
+        """ Create an object of any class"""
+        if not args:
             print("** class name missing **")
-        if classname not in HBNBCommand.classes:
+            return
+        arg_array = args.split(' ')
+        if arg_array[0] not in HBNBCommand.classes:
             print("** class doesn't exist **")
-
-        object_params = {}
-
-        for param in params:
-            # Replace underscores with spaces in the value
-            key, value = param.split('=')
-            value = value.replace('_', ' ')
-
-            # checks if it is a string and removes the quotation marks
-            if value.startswith('"') and value.endswith('"'):
-                value = value[1:-1].replace('\\"', '"')
-            # Check if the value is a float
-            elif '.' in value and\
-                    all(char.isdigit()
-                        for char in value.strip('-').replace('.', '', 1)):
-                value = float(value)
-            # check id the value is integer
-            elif value.strip('-').isdigit():
-                value = int(value)
+            return
+        kwargs = dict()
+        for i in range(1, len(arg_array)):
+            attr_array = arg_array[i].split('=')
+            if "\"" in attr_array[1] and attr_array[1][-1] == "\"":
+                attr_array[1] = attr_array[1][1:-1]
+                if "_" in attr_array[1]:
+                    attr_array[1] = attr_array[1].replace("_", " ")
+            elif "." in attr_array[1]:
+                try:
+                    attr_array[1] = float(attr_array[1])
+                except Exception:
+                    continue
             else:
-                continue
-
-            # add a key and a value to the dictionary
-            object_params[key] = value
-
-        # creates a new instance of the class specified by the user
-        new_object = globals()[classname](**object_params)
-
-        # stores the new instance
-        new_object.save()
-
-        # prints the id of the new instance
-        print(new_object.id)
+                try:
+                    attr_array[1] = int(attr_array[1])
+                except Exception:
+                    continue
+            kwargs[attr_array[0]] = attr_array[1]
+        new_instance = HBNBCommand.classes[arg_array[0]]()
+        new_instance.__dict__.update(kwargs)
+        print(new_instance.id)
+        new_instance.save()
 
     def help_create(self):
         """ Help information for the create method """
@@ -234,8 +224,9 @@ class HBNBCommand(cmd.Cmd):
             if args not in HBNBCommand.classes:
                 print("** class doesn't exist **")
                 return
-            for k, v in storage.all(HBNBCommand.classes.get(args)).items():
-                print_list.append(str(v))
+            for k, v in storage.all().items():
+                if k.split('.')[0] == args:
+                    print_list.append(str(v))
         else:
             for k, v in storage.all().items():
                 print_list.append(str(v))
