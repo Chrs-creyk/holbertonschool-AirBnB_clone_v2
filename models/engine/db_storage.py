@@ -1,96 +1,125 @@
-#!/usr/bin/python3
-"""This module defines a class to manage db storage for hbnb clone"""
-import os
-from sqlalchemy import create_engine, MetaData
-from sqlalchemy.orm import Session
-from sqlalchemy.orm import sessionmaker, scoped_session
+#!usr/bin/python3
+"""
+Module Name:
+db_storage
+Module Description:
+This module provides a storage engine for the HBNB project using SQLAlchemy to
+connect to a MySQL database. The module contains only one class - DBStorage.
+Module Classes:
+- DBStorage: This is the main class of the module that provides methods
+for creating, retrieving, updating, and deleting objects from the database.
+Module Attributes:
+- None
+"""
+from sqlalchemy import create_engine
+from os import getenv
 from models.base_model import Base
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import scoped_session
+from models.base_model import BaseModel
 from models.user import User
+from models.place import Place
 from models.state import State
 from models.city import City
 from models.amenity import Amenity
-from models.place import Place
 from models.review import Review
-import models
-
-classes = {'User': User, 'Place': Place,
-           'State': State, 'City': City, 'Amenity': Amenity,
-           'Review': Review}
 
 
 class DBStorage:
     """
-    DBStorage class
+    This class provides a storage
+    engine for the HBNB project. The class uses SQLAlchemy to connect
+    to a MySQL database and provides methods for creating, retrieving,
+    updating, and deleting objects from the database.
     """
     __engine = None
     __session = None
 
     def __init__(self):
-        ''' Init method for dbstorage'''
-        user = os.getenv('HBNB_MYSQL_USER')
-        pwd = os.getenv('HBNB_MYSQL_PWD')
-        host = os.getenv('HBNB_MYSQL_HOST')
-        db = os.getenv('HBNB_MYSQL_DB')
-        self.__engine = create_engine("mysql+mysqldb://{}:{}@{}:3306/{}".format(
-            user, pwd, host, db), pool_pre_ping=True)
-        metadata = MetaData()
-        if os.getenv('HBNB_ENV') == 'test':
-            metadata.drop_all()
+        """
+        It initializes the database connection engine using the credentials
+        stored in environment variables HBNB_MYSQL_USER, HBNB_MYSQL_PWD,
+        HBNB_MYSQL_HOST, and HBNB_MYSQL_DB. If the HBNB_ENV environment
+        variable is set to "test", it drops all the tables in the database
+        before creating them again.
+        """
+        user = getenv("HBNB_MYSQL_USER")
+        password = getenv("HBNB_MYSQL_PWD")
+        host = getenv("HBNB_MYSQL_HOST")
+        database = getenv("HBNB_MYSQL_DB")
+        env = getenv("HBNB_ENV")
+
+        self.__engine = \
+            create_engine(
+                'mysql+mysqldb://{}:{}@{}:3306/{}'.format(
+                    user,
+                    password,
+                    host,
+                    database), pool_pre_ping=True)
+
+        if (env == "test"):
+            Base.metadata.drop_all(bind=self.__engine)
+
+        self.__session = scoped_session(sessionmaker(bind=self.__engine,
+                                                     expire_on_commit=False))
 
     def all(self, cls=None):
         """
-        Retrieves dictionary of objects in database
-        Args:
-            cls (obj): class of objects to be queried
-        Returns:
-            dictionary of objects
+        This method returns a dictionary containing all objects of a given
+        class or all objects if no class is specified. It queries the database
+        and returns a dictionary with keys in the format
+        <class name>.<object id> and values set to the corresponding objects.
+        It accepts a string as the cls parameter and converts it to the
+        corresponding class using the built-in eval() function. If the cls
+        parameter is not a string, it assumes it is a class and
+        uses it directly.
         """
-        objs_dict = {}
-        objs = None
+        value = {}
         if cls:
-            if type(cls) is str and cls in classes:
-                cls = classes[cls]
-            objs = self.__session.query(cls).all()
+            for obj in self.__session.query(cls):
+                key = '{}.{}'.format(type(obj).__name__, obj.id)
+                value[key] = obj
         else:
-            objs = self.__session.query(User, State, City, Place).all()
-        for obj in objs:
-            key = "{}.{}".format(type(obj).__name__, obj.id)
-            objs_dict[key] = obj
-        return (objs_dict)
+            for cls in [Amenity, City, Place, Review, State, User]:
+                for obj in self.__session.query(cls):
+                    key = '{}.{}'.format(type(obj).__name__, obj.id)
+                    value[key] = obj
+        return value
 
     def new(self, obj):
         """
-        Creates a query on current db session depending on class name
+        This method adds the given object to the database session to be
+        persisted later. It accepts an object as a parameter and adds
+        it to the current session.
         """
-        self.__session.add(obj)
+        if obj:
+            self.__session.add(obj)
 
     def save(self):
         """
-        commit all changes of the current db session
+        This method saves all pending changes to the database.
+        It commits the current session to the database.
         """
         self.__session.commit()
 
     def delete(self, obj=None):
         """
-        delete from current db session obj if not none
+        This method deletes the given object from the database.
+        If no object is provided, it does nothing. If an object is provided,
+        it deletes it from the current session.
         """
-        if obj:
+        if obj is not None:
             self.__session.delete(obj)
             self.save()
 
     def reload(self):
         """
-        create all tb in db
-        create current db session and is thread safe
+        This method creates all the tables defined in the models package using
+        the SQLAlchemy create_all() function. It then creates a new session
+        factory and binds it to the engine. Finally, it creates a new scoped
+        session using the session factory and stores it in the __session
+        attribute of the DBStorage object.
         """
         Base.metadata.create_all(self.__engine)
-        session_factory = sessionmaker(bind=self.__engine,
-                                       expire_on_commit=False)
-        Session = scoped_session(session_factory)
+        Session = sessionmaker(bind=self.__engine)
         self.__session = Session()
-
-    def close(self):
-        """
-        Close session
-        """
-        self.__session.close()

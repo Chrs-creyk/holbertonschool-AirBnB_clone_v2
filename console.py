@@ -113,45 +113,46 @@ class HBNBCommand(cmd.Cmd):
         pass
 
     def do_create(self, args):
-        """ Create an object of any class"""
-        if not args:
+        classname, *params = args.split()
+
+        # Vallidations
+        if not classname:
             print("** class name missing **")
-            return
+        if classname not in HBNBCommand.classes:
+            print("** class doesn't exist **")
 
-        args = args.split(' ')
-        cls = args[0]
+        object_params = {}
 
-        if cls not in HBNBCommand.classes:
-            print("** class doesn't exist")
-            return
+        for param in params:
+            # Replace underscores with spaces in the value
+            key, value = param.split('=')
+            value = value.replace('_', ' ')
 
-        if cls in HBNBCommand.classes:
-            new_dict = {}
-            if len(args) == 1:
-                # print(args)
-                new_instance = HBNBCommand.classes[cls]()
-                # print(new_instance)
-                new_instance.save()
-                print(new_instance.id)
+            # checks if it is a string and removes the quotation marks
+            if value.startswith('"') and value.endswith('"'):
+                value = value[1:-1].replace('\\"', '"')
+            # Check if the value is a float
+            elif '.' in value and\
+                    all(char.isdigit()
+                        for char in value.strip('-').replace('.', '', 1)):
+                value = float(value)
+            # check id the value is integer
+            elif value.strip('-').isdigit():
+                value = int(value)
             else:
-                for a in args:
-                    if "=" in a:
-                        key_value_list = a.split('=')
-                        key = key_value_list[0]
-                        value = key_value_list[1]
-                        if value[0] and value[-1] == '"':
-                            value = value[1:-1]
-                            if '_' in value:
-                                value = value.replace('_', ' ')
-                        else:
-                            value = eval(value)
+                continue
 
-                        new_dict[key] = value
+            # add a key and a value to the dictionary
+            object_params[key] = value
 
-                new_instance = HBNBCommand.classes[cls]()
-                new_instance.__dict__.update(new_dict)
-                new_instance.save()
-                print(new_instance.id)
+        # creates a new instance of the class specified by the user
+        new_object = globals()[classname](**object_params)
+
+        # stores the new instance
+        new_object.save()
+
+        # prints the id of the new instance
+        print(new_object.id)
 
     def help_create(self):
         """ Help information for the create method """
@@ -214,7 +215,7 @@ class HBNBCommand(cmd.Cmd):
         key = c_name + "." + c_id
 
         try:
-            del(storage.all()[key])
+            del (storage.all()[key])
             storage.save()
         except KeyError:
             print("** no instance found **")
@@ -233,9 +234,8 @@ class HBNBCommand(cmd.Cmd):
             if args not in HBNBCommand.classes:
                 print("** class doesn't exist **")
                 return
-            for k, v in storage.all().items():
-                if k.split('.')[0] == args:
-                    print_list.append(str(v))
+            for k, v in storage.all(HBNBCommand.classes.get(args)).items():
+                print_list.append(str(v))
         else:
             for k, v in storage.all().items():
                 print_list.append(str(v))
