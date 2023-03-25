@@ -2,3 +2,9 @@ models/__pycache__
 models/engine/__pycache__
 **/__pycache__/
 console2.py
+.gitignore
+*.pyc
+*.pyo
+test_params_create.py
+file.json
+__pycache__/
