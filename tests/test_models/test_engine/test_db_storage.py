@@ -1,48 +1,74 @@
-#!/usr/bin/python3
-""" Test DBstorage"""
 import unittest
-from models.base_model import BaseModel
-from models import storage
 import os
+import tempfile
+from models import storage
+from models.engine.db_storage import DBStorage
 from models.state import State
 
 
-class test_dbstorage(unittest.TestCase):
-    """ Class to test the DBstorage method """
+class TestDBStorage(unittest.TestCase):
+    """Test Case """
 
-    @unittest.skipIf(os.getenv('HBNB_TYPE_STORAGE') != 'db',
-                     "Cannot storage if db is active")
+    @classmethod
+    def setUpClass(cls):
+        """ """
+        cls.db_fd, cls.db_path = tempfile.mkstemp()
+        os.environ['HBNB_TYPE_STORAGE'] = 'db'
+        storage._FileStorage__objects.clear()
+        cls.storage = DBStorage()
+        cls.storage.reload()
+
+    @classmethod
+    def tearDownClass(cls):
+        """
+        configures a database to be used as a data storage medium
+        """
+        os.close(cls.db_fd)
+        os.unlink(cls.db_path)
+
     def setUp(self):
-        """ Set up test environment """
-        del_list = []
-        for key in storage.all().keys():
-            del_list.append(key)
-        for key in del_list:
-            storage._DBStorage__session.delete(storage.all()[key])
-            storage._DBStorage__session.commit()
+        """
+        initializes the database of the data storage
+        instance for the test by removing all objects of the State class
+        """
+        self.session = self.storage._DBStorage__session
+        self.session.query(State).delete()
+        self.session.commit()
 
-    def test_obj_list_empty(self):
-        """ __objects is initially empty """
-        self.assertEqual(len(storage.all()), 0)
+    def tearDown(self):
+        """
+        performs cleaning operations
+        """
+        self.session.query(State).delete()
+        self.session.commit()
 
-    def test_reload_from_nonexistent(self):
-        """ Nothing happens if file does not exist """
-        self.assertEqual(storage.reload(), None)
+    def test_objects(self):
+        """
+        checks the object type
+        """
+        self.assertEqual(type(self.storage.all()), dict)
 
-    def test_type_objects(self):
-        """ Confirm __objects is a dict """
-        self.assertEqual(type(storage.all()), dict)
-
-    def test_store(self):
-        """ Test if an object is store in the database """
+    def test_storage(self):
+        """
+        verifica si un objeto creado a través de la clase State
+        """
         new = State(name="Florida")
         new.save()
         _id = new.to_dict()['id']
         self.assertIn(new.__class__.__name__ + '.' + _id,
-                        storage.all(type(new)).keys())
+                      self.storage.all(type(new)).keys())
 
-    def test_storage_var_created(self):
-        """ FileStorage object storage created """
-        from models.engine.db_storage import DBStorage
-        self.assertEqual(type(storage), DBStorage)
+    def test_storage_created(self):
+        """
+        verifica si la instancia de almacenamiento de dato
+        en el sistema se crea correctamente como una
+        instancia de la clase DBStorage.
+        """
+        self.assertEqual(type(self.storage), DBStorage)
 
+    def test_empty_database(self):
+        """
+        verifica si la instancia de almacenamiento
+        de datos en el sistema está vacía.
+        """
+        self.assertEqual(len(self.storage.all()), 0)
