@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-''' Star flask'''
+''' Start flask'''
 
 from flask import Flask
 
