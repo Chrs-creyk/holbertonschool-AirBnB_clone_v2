@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-''' Star flask'''
+''' Start flask'''
 
 from flask import Flask
 
@@ -12,4 +12,4 @@ def index():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0')
+    app.run(debug=True, host='0.0.0.0')
