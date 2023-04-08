@@ -1,36 +1,31 @@
 #!/usr/bin/python3
 """ State Module for HBNB project """
-from models.base_model import BaseModel
-from models.base_model import Base
+from models.base_model import BaseModel, Base
 from sqlalchemy import Column, String
 from sqlalchemy.orm import relationship
+from models.city import City
 from os import getenv
+import models
+
+env = getenv('HBNB_TYPE_STORAGE')
 
 
-class State(BaseModel, Base):
-    """
-    Represents a state for a MySQL database.
-    Inherits from SQLAlchemy Base and links to the MySQL table states.
-    Attributes:
-        __tablename__ (str): The name of the MySQL table to store States.
-        name (sqlalchemy String): The name of the State.
-        cities (sqlalchemy relationship): The State-City relationship.
-    """
-    storage = getenv("HBNB_TYPE_STORAGE")
+class State(BaseModel, Base if (env == "db") else object):
+    """ State class """
+    if env == "db":
+        __tablename__ = "states"
 
-    __tablename__ = "states"
-    name = Column(String(128), nullable=False)
-    cities = relationship('City', backref='state', cascade='all, delete')
+        name = Column(String(128), nullable=False)
+        cities = relationship("City", backref="state", cascade="delete")
+    else:
+        name = ''
 
-    if storage == 'fs':
         @property
         def cities(self):
-            """Returning the cities in the current state"""
-            from models import storage
+            """Return a list with the citites"""
+            city_dict = models.storage.all(City)
             city_list = []
-            for city in list(storage.all().values()):
-                if city.state_id == self.id:
-                    city_list.append(city)
+            for key, value in city_dict.items():
+                if value.state_id == self.id:
+                    city_list.append(value)
             return city_list
-    if storage == 'db':
-        cities = relationship('City', backref='state', cascade='all, delete')
