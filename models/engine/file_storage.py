@@ -69,7 +69,6 @@ class FileStorage:
             del self.__objects[key]
             self.save()
 
-
     def close(self):
         '''Required to update HBNB using flask'''
         self.reload()
