@@ -4,21 +4,19 @@ from flask import Flask, render_template
 from models.state import State
 from models import storage
 
-
 app = Flask(__name__)
 
 
-@app.route('/states_list', strict_slashes=False)
-def st_list():
-    st = storage.all(State).values()
-    return render_template('7-states_list.html', st=st)
+@app.route('/states_list')
+def states_list():
+    states = storage.all(State).values()
+    return render_template('7-states_list.html', states=states)
 
 
 @app.teardown_appcontext
-def teardown_db(exception):
-    '''remove the current SQLAlchemy Session'''
+def tear(self):
     storage.close()
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0')
+    app.run(debug=True,  port=5000, host='0.0.0.0')
