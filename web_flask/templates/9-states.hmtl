@@ -4,6 +4,7 @@
     <HEAD>
         <TITLE>HBNB</TITLE>
     </HEAD>
+
     <BODY>
     {% if not st_list and status == 0 %}
         <H1>Not found!</H1>
