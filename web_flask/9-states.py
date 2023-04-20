@@ -9,10 +9,12 @@ from os import getenv
 app = Flask(__name__)
 env = getenv('HBNB_TYPE_STORAGE')
 
+
 @app.teardown_appcontext
 def teardown_close(self):
     "Closses sqlalchemy session"
     storage.close()
+
 
 @app.route('/states/', strict_slashes=False)
 @app.route('/states/<id>', strict_slashes=False)
@@ -27,4 +29,4 @@ def state_list(id=None):
     return render_template('9-states.html', st_list=None, status=0)
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port="5000")
+    app.run(host="0.0.0.0", port="5000"
